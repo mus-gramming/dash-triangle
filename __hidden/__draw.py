@@ -3,6 +3,47 @@ import plotly.graph_objects as go
 from models.triangle import TriangleWithCoords
 
 
+def _draw_default():
+    fig = go.Figure()
+    
+    fig.update_layout(
+        # Thiết lập tọa độ mặc định (ví dụ từ -10 đến 10)
+        xaxis=dict(
+            range=[-10, 10],
+            showgrid=True,
+            gridcolor='rgba(255, 255, 255, 0.03)',
+            zerolinecolor='rgba(255, 255, 255, 0.1)',
+            tickfont=dict(color="#94a3b8"),
+            scaleanchor="y",
+        ),
+        yaxis=dict(
+            range=[-10, 10],
+            showgrid=True,
+            gridcolor='rgba(255, 255, 255, 0.03)',
+            zerolinecolor='rgba(255, 255, 255, 0.1)',
+            tickfont=dict(color="#94a3b8"),
+        ),
+        
+        # Nhuộm đen tuyệt đối
+        template="plotly_dark",
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        
+        height=600,
+        margin=dict(l=20, r=20, t=20, b=20),
+        
+        # Chữ hiển thị khi chưa có dữ liệu
+        annotations=[{
+            "text": "Vui lòng nhập tọa độ để phân tích",
+            "xref": "paper", "yref": "paper",
+            "showarrow": False,
+            "font": {"size": 16, "color": "#94a3b8"}
+        }]
+    )
+    return fig
+
+
+
 def _draw_triangle(x1, y1, x2, y2, x3, y3):
 
     tri = TriangleWithCoords(x1, y1, x2, y2, x3, y3)
@@ -251,22 +292,39 @@ def _draw_triangle(x1, y1, x2, y2, x3, y3):
 
         xaxis=dict(
             range=[cx-size,cx+size],
-            scaleanchor="y"
+            scaleanchor="y",
+            showgrid=True,
+            gridcolor='rgba(255, 255, 255, 0.03)', # Đường lưới siêu mờ
+            zerolinecolor='rgba(255, 255, 255, 0.1)', # Trục 0 mờ
+            tickfont=dict(color="#94a3b8") # Màu muted text cho tọa độ
         ),
 
         yaxis=dict(
-            range=[cy-size,cy+size]
+            range=[cy-size,cy+size],
+            showgrid=True,
+            gridcolor='rgba(255, 255, 255, 0.03)',
+            zerolinecolor='rgba(255, 255, 255, 0.1)',
+            tickfont=dict(color="#94a3b8")
         ),
 
         height=600,
+        margin=dict(l=20, r=20, t=40, b=20), # Giảm margin cho gọn
 
         legend=dict(
             orientation="h",
-            y=-0.2,
+            y=-0.1,
             x=0.5,
-            xanchor="center"
-        )
+            xanchor="center",
+            bgcolor="rgba(0,0,0,0)", # Legend trong suốt
+            bordercolor="rgba(255,255,255,0.05)", # Viền mờ
+            font=dict(color="#e2e4e9") # Màu text chính
+        ),
 
+        template="plotly_dark", # Sử dụng theme tối mặc định của Plotly
+        paper_bgcolor='rgba(0,0,0,0)', # Nền trong suốt để lộ nền web `#0f111a`
+        plot_bgcolor='rgba(0,0,0,0)',  # Nền vùng vẽ trong suốt
+
+        dragmode="pan", # Mặc định là chế độ kéo (Pan) cho dễ thao tác
     )
 
     return fig

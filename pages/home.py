@@ -4,7 +4,8 @@ import dash_bootstrap_components as dbc
 
 dash.register_page(__name__, path="/")
 
-# ===== COMPONENT TÁI SỬ DỤNG =====
+
+
 def make_feature_card(icon, title, desc, link, color):
     return dbc.Card(
         dbc.CardBody([
@@ -68,7 +69,7 @@ layout = dbc.Container(
 
             ],
 
-            className="g-3 mb-5"
+            className="g-2"
 
         )
 
@@ -76,4 +77,5 @@ layout = dbc.Container(
 
     fluid=True
 )
+
 

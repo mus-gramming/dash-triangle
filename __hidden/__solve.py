@@ -1,9 +1,6 @@
-from __hidden.__draw import _draw_triangle
+from __hidden.__draw import _draw_triangle, _draw_default
 from __hidden.__table import _create_table
 from init_database import TriangleDomain, get_session
-import models.triangle as triangle
-from flask import jsonify
-import datetime
 import dash_bootstrap_components as dbc
 import math
 
@@ -39,7 +36,7 @@ def _solve_ccc_common(a, b, c):
 
     # 3. Logic hiển thị giao diện (Chỗ này mới chặn người dùng xem)
     if a + b <= c or a + c <= b or b + c <= a:
-        return dbc.Alert("Tam giác không tồn tại", color="danger"), None
+        return dbc.Alert("Theo bất đẳng thức tam giác, tổng hai cạnh phải lớn hơn cạnh còn lại.", color="danger"), _draw_default()
 
     graph = _draw_triangle(0, 0, c, 0, x, y)
     table = _create_table(0, 0, c, 0, x, y)

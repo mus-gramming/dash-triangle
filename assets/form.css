@@ -1,39 +1,52 @@
-/* Tùy chỉnh Input "Đậm vị" */
-.form-control {
-    /* Dùng màu đặc (solid) thay vì rgba để tạo độ sâu */
-    background-color: #0f111a !important; 
-    border: 1px solid #2d3245 !important;
-    color: #e2e4e9 !important;
-    border-radius: 10px !important;
-    transition: all 0.2s ease-in-out !important;
-}
-
-.form-control:focus {
-    background-color: #050608 !important; /* Tối hơn nữa khi focus */
-    border-color: #4a90e2 !important;
-    box-shadow: 0 0 10px rgba(74, 144, 226, 0.3) !important;
-}
-
-/* Fix Dropdown & DatePicker cho Mus - Đậm đà hơn */
+/* 1. ĐẶC TRỊ DROPDOWN (dcc.Dropdown) */
+/* Nhắm vào khung chứa */
 .dark-dropdown .Select-control {
-    background-color: #0f111a !important;
-    border: 1px solid #2d3245 !important;
+    background-color: #ffffff !important;
+    border: 2px solid #333 !important; /* Viền đậm cho rõ khung */
+    height: 38px !important;
 }
 
-/* Quan trọng: Phần menu đổ xuống phải ĐẬM */
+/* Nhắm vào chữ ĐÃ CHỌN - Ép ĐEN TUYỀN */
+.dark-dropdown .Select-value-label {
+    color: #000000 !important;
+    font-weight: 800 !important; /* Siêu đậm */
+    padding-left: 10px !important;
+}
+
+/* Nhắm vào chữ CHƯA CHỌN (Placeholder) */
+.dark-dropdown .Select-placeholder {
+    color: #555555 !important; /* Xám đậm để dễ đọc hơn xám nhạt */
+    font-weight: 600 !important;
+}
+
+/* Nhắm vào danh sách xổ xuống */
 .dark-dropdown .Select-menu-outer {
-    background-color: #0f111a !important;
-    border: 1px solid #4a90e2 !important; /* Viền xanh cho nổi bật */
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5) !important;
+    background-color: #ffffff !important;
+    border: 2px solid #333 !important;
+    z-index: 1000 !important;
 }
 
-/* Màu chữ khi di chuột qua các lựa chọn */
-.dark-dropdown .VirtualizedSelectOption:hover {
-    background-color: #1a1d2b !important;
-    color: #4a90e2 !important;
+/* Chữ trong các option khi xổ xuống */
+.dark-dropdown .VirtualizedSelectOption {
+    color: #000000 !important;
+    font-weight: 600 !important;
 }
 
-.dark-date-picker .DateRangePickerInput {
-    background-color: #0f111a !important;
-    border: 1px solid #2d3245 !important;
+/* 2. ĐẶC TRỊ DATE PICKER (dcc.DatePickerRange) */
+.dark-date-picker {
+    border: 2px solid #333 !important;
+    border-radius: 4px;
+    background-color: #ffffff !important;
+}
+
+.dark-date-picker .DateInput_input {
+    color: #000000 !important;
+    font-weight: 800 !important;
+    background-color: #ffffff !important;
+    border-bottom: none !important;
+}
+
+/* Dấu gạch ngang giữa 2 ô ngày */
+.DateRangePickerInput_arrow_svg {
+    fill: #000000 !important;
 }

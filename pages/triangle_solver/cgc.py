@@ -3,110 +3,123 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import math
 from __hidden.__solve import _solve_ccc_common
+from __hidden.__draw import _draw_default
+from __hidden.__safe import _safe_extract_to_real_num
+
+
+
+# Style đồng nhất với file CCC
+input_style = {"width": "80px", "textAlign": "center"}
+res_style = {"width": "120px", "fontWeight": "bold", "color": "#4a90e2", "fontSize": "1.1rem"}
 
 layout = html.Div([
-
     dbc.Container([
-
-        dbc.Row([
-            dbc.Col("Nhập dạng cạnh = a + b√c", width=3),
-            dbc.Col("Nhập a", width=3),
-            dbc.Col("Nhập b", width=3),
-            dbc.Col("Nhập c", width=3),
-        ], className="fw-bold mb-3"),
-
         # Cạnh 1
         dbc.Row([
-            dbc.Col("Cạnh 1", width=3),
-            dbc.Col(dcc.Input(id="cgc_c1_a", type="number", value=0, className="mb-2"), width=3),
-            dbc.Col(dcc.Input(id="cgc_c1_b", type="number", value=0, className="mb-2"), width=3),
-            dbc.Col(dcc.Input(id="cgc_c1_c", type="number", value=1, min=0, className="mb-2"), width=3),
-        ], className="mb-2"),
+            dbc.Col("Cạnh 1", width=2, className="align-self-center fw-bold"),
+            dbc.Col(
+                dbc.InputGroup([
+                    dbc.Input(id="cgc_c1_a", type="number", value=0, style=input_style),
+                    dbc.InputGroupText("+", className="bg-transparent border-0"),
+                    dbc.Input(id="cgc_c1_b", type="number", value=1, style=input_style),
+                    dbc.InputGroupText("√", className="bg-transparent border-0"),
+                    dbc.Input(id="cgc_c1_c", type="number", value=0, min=0, style=input_style),
+                    dbc.InputGroupText("=", className="bg-transparent border-0"),
+                    dbc.InputGroupText("≈", className="bg-transparent border-0"),
+                    dbc.Input(id="cgc_c1_val", type="number", readonly=True, plaintext=True, style=res_style),
+                ]), width=10
+            )
+        ], className="mb-3"),
 
         # Góc giữa
         dbc.Row([
-            dbc.Col("Góc giữa (độ)", width=3),
-            dbc.Col(dcc.Input(id="cgc_angle", type="number", value=60, className="mb-2"), width=9),
-        ], className="mb-2"),
+            dbc.Col("Góc giữa", width=2, className="align-self-center fw-bold"),
+            dbc.Col(
+                dbc.InputGroup([
+                    dbc.Input(id="cgc_angle", type="number", value=60, min=0.1, max=179.9, style={"width": "100px"}),
+                    dbc.InputGroupText("độ (°)"),
+                ]), width=10
+            )
+        ], className="mb-3"),
 
         # Cạnh 2
         dbc.Row([
-            dbc.Col("Cạnh 2", width=3),
-            dbc.Col(dcc.Input(id="cgc_c2_a", type="number", value=0, className="mb-2"), width=3),
-            dbc.Col(dcc.Input(id="cgc_c2_b", type="number", value=0, className="mb-2"), width=3),
-            dbc.Col(dcc.Input(id="cgc_c2_c", type="number", value=1, min=0, className="mb-2"), width=3),
-        ], className="mb-2"),
+            dbc.Col("Cạnh 2", width=2, className="align-self-center fw-bold"),
+            dbc.Col(
+                dbc.InputGroup([
+                    dbc.Input(id="cgc_c2_a", type="number", value=0, style=input_style),
+                    dbc.InputGroupText("+", className="bg-transparent border-0"),
+                    dbc.Input(id="cgc_c2_b", type="number", value=1, style=input_style),
+                    dbc.InputGroupText("√", className="bg-transparent border-0"),
+                    dbc.Input(id="cgc_c2_c", type="number", value=0, min=0, style=input_style),
+                    dbc.InputGroupText("=", className="bg-transparent border-0"),
+                    dbc.InputGroupText("≈", className="bg-transparent border-0"),
+                    dbc.Input(id="cgc_c2_val", type="number", readonly=True, plaintext=True, style=res_style),
+                ]), width=10
+            )
+        ], className="mb-4"),
 
-    ]),
+    ], fluid=True),
 
     dbc.Row(
         dbc.Col(
             dcc.Loading(
-                type="circle",
-                children=dbc.Button(
-                    "Tính",
-                    id="btn_cgc",
-                    color="primary",
-                    className="mt-3"
-                )
-            ),
-            width=12,
-            className="text-center"
+                children=dbc.Button("Tính toán", id="btn_cgc", color="primary", size="lg", disabled=True, className="px-5")
+            ), className="text-center"
         )
     ),
 
     dbc.Row([
-        dbc.Col(html.Div(id="o_cgc"), width=4),
-        dbc.Col(dcc.Graph(id="output_cgc"), width=8)
-    ])
-],
-id="cgc"
-)
+        dbc.Col(html.Div(id="o_cgc"), width=12, lg=4),
+        dbc.Col(dcc.Graph(id="output_cgc", figure=_draw_default()), width=12, lg=8)
+    ], className="mt-4")
+], id="cgc", className="p-3")
+
 
 
 @callback(
-    Output("output2", "figure"),
-    Input("btn_cgc", "n_clicks"),
-    State("cgc_c1", "value"),
-    State("cgc_angle", "value"),
-    State("cgc_c2", "value"),
-    prevent_initial_call=True
-)
-@callback(
     [
-        Output("o_cgc", "children"),
-        Output("output_cgc", "figure"),
+        Output("cgc_c1_val", "value"),
+        Output("cgc_c2_val", "value"),
+        Output("btn_cgc", "disabled")
     ],
-    Input("btn_cgc", "n_clicks"),
-
     [
-        State("cgc_c1_a", "value"),
-        State("cgc_c1_b", "value"),
-        State("cgc_c1_c", "value"),
-
-        State("cgc_angle", "value"),
-
-        State("cgc_c2_a", "value"),
-        State("cgc_c2_b", "value"),
-        State("cgc_c2_c", "value"),
-    ],
-    prevent_initial_call=True
+        Input("cgc_c1_a", "value"), Input("cgc_c1_b", "value"), Input("cgc_c1_c", "value"),
+        Input("cgc_c2_a", "value"), Input("cgc_c2_b", "value"), Input("cgc_c2_c", "value"),
+        Input("cgc_angle", "value")
+    ]
 )
-def calc_cgc(n, c1_a, c1_b, c1_c, angle_deg, c2_a, c2_b, c2_c):
-    if None in [c1_a, c1_b, c1_c, angle_deg, c2_a, c2_b, c2_c]:
-        raise PreventUpdate
-
-    c1 = c1_a + c1_b * math.sqrt(max(c1_c, 0))
-    c2 = c2_a + c2_b * math.sqrt(max(c2_c, 0))
+def update_cgc_inputs(c1a, c1b, c1c, c2a, c2b, c2c, angle):
+    v1 = _safe_extract_to_real_num(c1a, c1b, c1c)
+    v2 = _safe_extract_to_real_num(c2a, c2b, c2c)
     
+    # Kiểm tra hợp lệ: cạnh > 0 và 0 < góc < 180
+    is_valid = all([
+        v1 is not None and v1 > 0,
+        v2 is not None and v2 > 0,
+        angle is not None and 0 < angle < 180
+    ])
+    
+    # Trả về v1, v2 kiểu float (không cần f-string nữa)
+    return v1, v2, not is_valid
+
+
+
+@callback(
+    [Output("o_cgc", "children"), Output("output_cgc", "figure")],
+    Input("btn_cgc", "n_clicks"),
+    [
+        State("cgc_c1_val", "value"),
+        State("cgc_c2_val", "value"),
+        State("cgc_angle", "value")
+    ],
+    prevent_initial_call=True
+)
+def calc_cgc_final(n, c1, c2, angle_deg):
     angle_rad = math.radians(angle_deg)
     
     cos_val = c1**2 + c2**2 - 2*c1*c2*math.cos(angle_rad)
     c3 = math.sqrt(max(cos_val, 0))
 
     table, graph = _solve_ccc_common(c1, c3, c2)
-
-    if angle_deg <= 0 or angle_deg >= 180 or c1 <= 0 or c2 <= 0:
-        return dbc.Alert("Dữ liệu không tạo thành tam giác hợp lệ", color="danger"), None
-
     return table, graph

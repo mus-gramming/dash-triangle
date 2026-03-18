@@ -2,7 +2,7 @@ from dash import html
 import dash
 import dash_bootstrap_components as dbc
 
-# 1️⃣ Sửa Navbar: Chuyển sang Dark mode để chữ tự sáng lên
+
 navbar = dbc.NavbarSimple(
     brand="Triangle Analyzer",
     brand_href="/",
@@ -33,10 +33,12 @@ layout = html.Div([
                             "Phân tích – Tính toán – Lưu trữ dữ liệu hình học phẳng",
                             className="hero-sub",
                         ),
-                    ], className="hero-box")
-                )
+                    ], className="hero-box"),
+                    md=8
+                ),
+                className="justify-content-center" 
             )
-        ], className="mt-5 pt-5")
+        ], className="text-center")
     ]),
 
     html.Main([
@@ -48,15 +50,11 @@ layout = html.Div([
 
     html.Footer([
         dbc.Container([
-            html.Hr(style={"borderColor": "rgba(255,255,255,0.1)"}), # Đường kẻ mờ
+            html.Hr(style={"borderColor": "rgba(255,255,255,0.1)"}),
             html.Div([
                 html.Small("© 2026 Mus · Triangle Analysis App", className="text-muted")
-            ], className="text-center pb-4")
+            ], className="text-center")
         ])
     ])
 
-], **{"data-bs-theme": "dark"}, style={"minHeight": "100vh"}) # Quan trọng: Ép Dark Theme toàn trang
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+], **{"data-bs-theme": "dark"}, style={"minHeight": "100vh"})

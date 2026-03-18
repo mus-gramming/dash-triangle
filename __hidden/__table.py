@@ -38,7 +38,7 @@ def _create_table(x1, y1, x2, y2, x3, y3):
                     html.Th("Thông số"),
                     html.Th("Giá trị")
                 ]),
-                className="table-light"
+                className="dark-thead"
             ),
 
             html.Tbody([
@@ -68,9 +68,10 @@ def _create_table(x1, y1, x2, y2, x3, y3):
         [
             dbc.CardHeader(
                 "Kết quả phân tích tam giác",
-                className="fw-semibold bg-white border-0"
+                className="fw-semibold border-0 bg-transparent text-info"
             ),
             dbc.CardBody(table)
         ],
-        className="shadow-sm border-0"
+        className="shadow-sm border-0",
+        style={"backgroundColor": "#1a1d2b"}
     )

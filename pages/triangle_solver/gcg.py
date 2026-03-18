@@ -3,98 +3,112 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import math
 from __hidden.__solve import _solve_ccc_common
+from __hidden.__draw import _draw_default
+from __hidden.__safe import _safe_extract_to_real_num
 
+
+input_style = {"width": "80px", "textAlign": "center"}
+res_style = {"width": "120px", "fontWeight": "bold", "color": "#4a90e2", "fontSize": "1.1rem"}
 
 layout = html.Div([
     dbc.Container([
-
-        dbc.Row([
-            dbc.Col("Nhập góc (độ)", width=3),
-            dbc.Col(width=9),
-        ], className="fw-bold mb-3"),
-
         # Góc 1
         dbc.Row([
-            dbc.Col("Góc 1 (độ)", width=3),
-            dbc.Col(dbc.Input(id="gcg_angle1", type="number", value=45, className="mb-2"), width=9),
-        ], className="mb-2"),
+            dbc.Col("Góc 1", width=2, className="align-self-center fw-bold"),
+            dbc.Col(
+                dbc.InputGroup([
+                    dbc.Input(id="gcg_angle1", type="number", value=45, min=0.1, max=179.8, style={"maxWidth": "150px"}),
+                    dbc.InputGroupText("độ (°)"),
+                ]), width=10
+            ),
+        ], className="mb-3"),
 
         # Cạnh giữa
         dbc.Row([
-            dbc.Col("Cạnh giữa (x = a + b√c)", width=3),
-            dbc.Col(dbc.Input(id="gcg_c_a", type="number", value=0, className="mb-2"), width=3),
-            dbc.Col(dbc.Input(id="gcg_c_b", type="number", value=0, className="mb-2"), width=3),
-            dbc.Col(dbc.Input(id="gcg_c_c", type="number", value=1, min=0, className="mb-2"), width=3),
-        ], className="mb-2"),
+            dbc.Col("Cạnh giữa", width=2, className="align-self-center fw-bold"),
+            dbc.Col(
+                dbc.InputGroup([
+                    dbc.Input(id="gcg_c_a", type="number", value=0, style=input_style),
+                    dbc.InputGroupText("+", className="bg-transparent border-0"),
+                    dbc.Input(id="gcg_c_b", type="number", value=1, style=input_style),
+                    dbc.InputGroupText("√", className="bg-transparent border-0"),
+                    dbc.Input(id="gcg_c_c", type="number", value=0, min=0, style=input_style),
+                    dbc.InputGroupText("=", className="bg-transparent border-0"),
+                    dbc.InputGroupText("≈", className="bg-transparent border-0"),
+                    dbc.Input(id="gcg_c_val", type="number", readonly=True, plaintext=True, style=res_style),
+                ]), width=10
+            )
+        ], className="mb-3"),
 
         # Góc 2
         dbc.Row([
-            dbc.Col("Góc 2 (độ)", width=3),
-            dbc.Col(dbc.Input(id="gcg_angle2", type="number", value=45, className="mb-2"), width=9),
-        ], className="mb-2"),
+            dbc.Col("Góc 2", width=2, className="align-self-center fw-bold"),
+            dbc.Col(
+                dbc.InputGroup([
+                    dbc.Input(id="gcg_angle2", type="number", value=45, min=0.1, max=179.8, style={"maxWidth": "150px"}),
+                    dbc.InputGroupText("độ (°)"),
+                ]), width=10
+            ),
+        ], className="mb-4"),
 
-    ]),
+    ], fluid=True),
 
     dbc.Row(
         dbc.Col(
             dcc.Loading(
-                type="circle",
-                children=dbc.Button(
-                    "Tính",
-                    id="btn_gcg",
-                    color="primary",
-                    className="mt-3"
-                )
-            ),
-            width=12,
-            className="text-center"
+                children=dbc.Button("Giải tam giác", id="btn_gcg", color="primary", size="lg", disabled=True, className="px-5")
+            ), className="text-center"
         )
     ),
 
     dbc.Row([
-        dbc.Col(html.Div(id="o_gcg"), width=4),
-        dbc.Col(dcc.Graph(id="output_gcg"), width=8)
-    ])
-],
-id="gcg"
-)
+        dbc.Col(html.Div(id="o_gcg"), width=12, lg=4),
+        dbc.Col(dcc.Graph(id="output_gcg", figure=_draw_default()), width=12, lg=8)
+    ], className="mt-4")
+], id="gcg", className="p-3")
+
+
 
 @callback(
+    [Output("gcg_c_val", "value"), Output("btn_gcg", "disabled")],
     [
-        Output("o_gcg", "children"),
-        Output("output_gcg", "figure"),
-    ],
-    Input("btn_gcg", "n_clicks"),
+        Input("gcg_c_a", "value"), Input("gcg_c_b", "value"), Input("gcg_c_c", "value"),
+        Input("gcg_angle1", "value"), Input("gcg_angle2", "value")
+    ]
+)
+def update_gcg_real_time(a, b, c, g1, g2):
+    val_c = _safe_extract_to_real_num(a, b, c)
+    
+    is_valid = all([
+        val_c is not None and val_c > 0,
+        g1 is not None and g2 is not None,
+        g1 and g2 and (g1 + g2) < 180
+    ])
+    
+    return val_c, not is_valid
 
+
+
+@callback(
+    [Output("o_gcg", "children"), Output("output_gcg", "figure")],
+    Input("btn_gcg", "n_clicks"),
     [
+        State("gcg_c_val", "value"),
         State("gcg_angle1", "value"),
-        State("gcg_c_a", "value"),
-        State("gcg_c_b", "value"),
-        State("gcg_c_c", "value"),
-        State("gcg_angle2", "value"),
+        State("gcg_angle2", "value")
     ],
     prevent_initial_call=True
 )
-def calc_gcg(n, angle1_deg, c_a, c_b, c_c, angle2_deg):
-    if None in [angle1_deg, c_a, c_b, c_c, angle2_deg]:
-        raise PreventUpdate
-
-    base = c_a + c_b * math.sqrt(max(c_c, 0))
-    A = math.radians(angle1_deg)
-    B = math.radians(angle2_deg)
+def solve_gcg_final(n, base_c, g1, g2):
+    g3 = 180 - g1 - g2
     
-    C_rad = math.pi - A - B
-    sin_C = math.sin(C_rad)
+    A = math.radians(g1)
+    B = math.radians(g2)
+    C = math.radians(g3)
     
-    if abs(sin_C) < 1e-9:
-        side1, side2 = 0.0, 0.0
-    else:
-        side1 = abs(base * math.sin(B) / sin_C)
-        side2 = abs(base * math.sin(A) / sin_C)
+    side_a = base_c * math.sin(A) / math.sin(C)
+    side_b = base_c * math.sin(B) / math.sin(C)
 
-    table, graph = _solve_ccc_common(side1, side2, base)
-
-    if angle1_deg <= 0 or angle2_deg <= 0 or (angle1_deg + angle2_deg) >= 180 or base <= 0:
-        return dbc.Alert("Dữ liệu không tạo thành tam giác (Tổng góc >= 180° hoặc cạnh <= 0)", color="danger"), None
-
+    table, graph = _solve_ccc_common(side_a, side_b, base_c)
+    
     return table, graph

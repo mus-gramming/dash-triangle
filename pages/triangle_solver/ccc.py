@@ -3,113 +3,92 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import math
 from __hidden.__solve import _solve_ccc_common
+from __hidden.__draw import _draw_default
+from __hidden.__safe import _safe_extract_to_real_num
+
+
+
+# Định nghĩa style chung cho các ô nhập liệu nhỏ
+input_style = {"width": "80px", "textAlign": "center", "borderRadius": "5px"}
+res_style = {"width": "120px", "fontWeight": "bold", "color": "#4a90e2", "fontSize": "1.1rem"}
 
 layout = html.Div([
-
     dbc.Container([
+        # Hàm tạo hàng nhập liệu cho gọn code
+        *[dbc.Row([
+            dbc.Col(f"Cạnh {i}", width=2, className="fw-bold align-self-center"),
+            dbc.Col(
+                dbc.InputGroup([
+                    dbc.Input(id=f"c{i}_a", type="number", value=0, style=input_style),
+                    dbc.InputGroupText("+", className="bg-transparent border-0"),
+                    dbc.Input(id=f"c{i}_b", type="number", value=1, style=input_style),
+                    dbc.InputGroupText("√", className="bg-transparent border-0"),
+                    dbc.Input(id=f"c{i}_c", type="number", value=0, min=0, style=input_style),
+                    dbc.InputGroupText("=", className="bg-transparent border-0"),
+                    dbc.Input(id=f"c{i}", type="number", readonly=True, plaintext=True, style=res_style),
+                ], className="mb-3")
+            , width=10)
+        ]) for i in range(1, 4)],
+
+        dbc.Row(
+            dbc.Col(
+                dcc.Loading(
+                    children=dbc.Button("Tính toán", id="btn", color="primary", size="lg", disabled=True, className="px-5 mt-3")
+                ), className="text-center"
+            )
+        ),
 
         dbc.Row([
-            dbc.Col("Nhập dạng x = a + b√c", width=3),
-            dbc.Col("Nhập a", width=3),
-            dbc.Col("Nhập b", width=3),
-            dbc.Col("Nhập c", width=3),
-        ], className="fw-bold mb-3"),
-
-        dbc.Row([
-            dbc.Col("Cạnh 1", width=3),
-            dbc.Col(dbc.Input(id="c1_a", type="number", value=0, className="mb-2"), width=3),
-            dbc.Col(dbc.Input(id="c1_b", type="number", value=0, className="mb-2"), width=3),
-            dbc.Col(dbc.Input(id="c1_c", type="number", value=1, min=0, className="mb-2"), width=3),
-        ], className="mb-2"),
-
-        dbc.Row([
-            dbc.Col("Cạnh 2", width=3),
-            dbc.Col(dbc.Input(id="c2_a", type="number", value=0, className="mb-2"), width=3),
-            dbc.Col(dbc.Input(id="c2_b", type="number", value=0, className="mb-2"), width=3),
-            dbc.Col(dbc.Input(id="c2_c", type="number", value=1, min=0, className="mb-2"), width=3),
-        ], className="mb-2"),
-
-        dbc.Row([
-            dbc.Col("Cạnh 3", width=3),
-            dbc.Col(dbc.Input(id="c3_a", type="number", value=0), width=3, className="mb-2"),
-            dbc.Col(dbc.Input(id="c3_b", type="number", value=0), width=3, className="mb-2"),
-            dbc.Col(dbc.Input(id="c3_c", type="number", value=1, min=0), width=3, className="mb-2"),
-        ], className="mb-2"),
-
-    ]),
-    
-    dbc.Row(
-        dbc.Col(
-            dcc.Loading(
-                type="circle",
-                children=dbc.Button(
-                    "Tính",
-                    id="btn",
-                    color="primary",
-                    className="mt-3"
-                )
-            ),
-            width=12,
-            className="text-center"
-        )
-    ),
-
-
-    dbc.Row([
-        dbc.Col(html.Div(id="o1"), width=4),
-        dbc.Col(dcc.Graph(id="output1"), width=8)
-    ])
-    ],
-    id="ccc"
-)
+            dbc.Col(html.Div(id="o1"), width=12, lg=4),
+            dbc.Col(dcc.Graph(id="output1", figure=_draw_default()), width=12, lg=8)
+        ], className="mt-4")
+    ], fluid=True)
+], id="ccc", className="p-3")
 
 
 
 @callback(
     [
-        Output("o1", "children"),
-        Output("output1", "figure"),
-    ],
-    Input("btn", "n_clicks"),
-
+        Output("c1", "value"), Output("c2", "value"), Output("c3", "value"),
+        Output("btn", "disabled")
+    ], 
     [
-        State("c1_a", "value"),
-        State("c1_b", "value"),
-        State("c1_c", "value"),
+        Input("c1_a", "value"), Input("c1_b", "value"), Input("c1_c", "value"),
+        Input("c2_a", "value"), Input("c2_b", "value"), Input("c2_c", "value"),
+        Input("c3_a", "value"), Input("c3_b", "value"), Input("c3_c", "value"),
+    ]
+)
+def update_real_values(*vals):
+    v1 = _safe_extract_to_real_num(vals[0], vals[1], vals[2])
+    v2 = _safe_extract_to_real_num(vals[3], vals[4], vals[5])
+    v3 = _safe_extract_to_real_num(vals[6], vals[7], vals[8])
     
-        State("c2_a", "value"),
-        State("c2_b", "value"),
-        State("c2_c", "value"),
+    is_ready = all(v > 0 for v in [v1, v2, v3] if v is not None)
+    
+    return v1, v2, v3, not is_ready
 
-        State("c3_a", "value"),
-        State("c3_b", "value"),
-        State("c3_c", "value"),
+
+
+@callback(
+    [Output("o1", "children"), Output("output1", "figure")],
+    Input("btn", "n_clicks"),
+    [
+        State("c1", "value"), 
+        State("c2", "value"), 
+        State("c3", "value")
     ],
     prevent_initial_call=True
 )
-def calc_ccc(n, c1_a, c1_b, c1_c, c2_a, c2_b, c2_c, c3_a, c3_b, c3_c):
-    # 1. Chặn None (Chưa bấm hoặc nhập thiếu thì không làm gì)
-    if None in [c1_a, c1_b, c1_c, c2_a, c2_b, c2_c, c3_a, c3_b, c3_c]:
-        raise PreventUpdate
-
-    # 2. Tính toán an toàn (Bọc max(..., 0) để tránh lỗi căn số âm)
-    c1 = c1_a + c1_b * math.sqrt(max(c1_c, 0))
-    c2 = c2_a + c2_b * math.sqrt(max(c2_c, 0))
-    c3 = c3_a + c3_b * math.sqrt(max(c3_c, 0))
-
-    # 3. GỌI HÀM COMMON ĐỂ LƯU DATABASE TRƯỚC
-    # (Hàm _solve_ccc_common của Mus sẽ lo việc khởi tạo TriangleDomain và commit)
+def calc_ccc(n, c1, c2, c3):
     table, graph = _solve_ccc_common(c1, c2, c3)
 
-    # 4. KIỂM TRA ĐIỀU KIỆN ĐỂ HIỂN THỊ ALERT (Sau khi đã lưu vết)
-    if c1 + c2 <= c3 or c1 + c3 <= c2 or c2 + c3 <= c1 or any(c <= 0 for c in [c1, c2, c3]):
+    if c1 + c2 <= c3 or c1 + c3 <= c2 or c2 + c3 <= c1:
         return (
             dbc.Alert(
-                "Tam giác không tồn tại",
-                color="danger",
-                className="mt-3"
+                "Không thỏa mãn bất đẳng thức tam giác: Tổng hai cạnh phải lớn hơn cạnh còn lại.",
+                color="danger", className="mt-3"
             ),
-            None
+            _draw_default()
         )
 
     return table, graph

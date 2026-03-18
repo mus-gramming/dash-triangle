@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
-from datetime import datetime
-from sqlalchemy import create_engine, DateTime, Float, Integer, String, Index, Boolean
+from datetime import datetime, timedelta
+from sqlalchemy import create_engine, DateTime, Float, Integer, String, Boolean
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, mapped_column, Mapped
 from models.triangle import TriangleWithCoords
 
@@ -35,7 +35,7 @@ class TriangleDomain(Base):
     y3: Mapped[float] = mapped_column(Float)
 
     by: Mapped[str] = mapped_column(String)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.utcnow() + timedelta(hours=7))
     
     edge_type: Mapped[str] = mapped_column(String, nullable=True) # Để nullable=True cho an toàn
     angle_type: Mapped[str] = mapped_column(String, nullable=True)

@@ -7,6 +7,7 @@ import math
 
 
 def _solve_ccc_common(a, b, c):
+    
     # 1. Tính toán tọa độ an toàn (Vệ sĩ tránh chia cho 0)
     x, y = 0.0, 0.0
     if c != 0:

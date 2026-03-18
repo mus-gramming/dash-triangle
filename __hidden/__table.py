@@ -5,6 +5,23 @@ from models.triangle import TriangleWithCoords
 
 
 def _create_table(x1, y1, x2, y2, x3, y3):
+    """
+    Khởi tạo và cấu hình bảng hiển thị thông số kỹ thuật của tam giác.
+    
+    Hàm này thực hiện:
+    1. Chuyển đổi tọa độ thô thành đối tượng TriangleWithCoords để tính toán.
+    2. Trích xuất các thuộc tính hình học (Cạnh, Góc, Chu vi, Diện tích...).
+    3. Định dạng dữ liệu (lấy 2 chữ số thập phân) và gán đơn vị (độ °).
+    4. Xây dựng giao diện bảng bằng Dash Bootstrap Components (dbc.Table).
+    
+    Args:
+        x1, y1 (float): Tọa độ đỉnh A.
+        x2, y2 (float): Tọa độ đỉnh B.
+        x3, y3 (float): Tọa độ đỉnh C.
+        
+    Returns:
+        dbc.Card: Một Card chứa tiêu đề và bảng dữ liệu đã được định dạng cho Dark Mode.
+    """
 
     tri = TriangleWithCoords(x1, y1, x2, y2, x3, y3)
 

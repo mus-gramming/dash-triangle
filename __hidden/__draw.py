@@ -45,7 +45,25 @@ def _draw_default():
 
 
 def _draw_triangle(x1, y1, x2, y2, x3, y3):
+    """
+    Vẽ đồ thị tam giác tương tác bằng Plotly, bao gồm các đường đặc biệt.
 
+    Args:
+    - x1, y1, x2, y2, x3, y3: Tọa độ 3 đỉnh A, B, C
+    
+    Các thành phần hỗ trợ:
+    - Đường trung tuyến & Trọng tâm (G)
+    - Đường cao & Trực tâm (H)
+    - Đường phân giác & Tâm nội tiếp (I)
+    - Đường trung trực & Tâm ngoại tiếp (O)
+    - Đường thẳng Euler (O-G-H)
+    
+    Args:
+        x1, y1, x2, y2, x3, y3 (float): Tọa độ 3 đỉnh.
+        
+    Returns:
+        go.Figure: Đối tượng đồ họa Plotly đã được cấu hình Dark Mode.
+    """
     tri = TriangleWithCoords(x1, y1, x2, y2, x3, y3)
 
     A, B, C = tri.A, tri.B, tri.C
@@ -132,34 +150,44 @@ def _draw_triangle(x1, y1, x2, y2, x3, y3):
 
 
     # =================================
-    # 3 ALTITUDE (SỬA CHỖ QUAN TRỌNG)
+    # 3 ALTITUDE (BẢN LOGIC TUYỆT ĐỐI)
     # =================================
-
-    for v,f in [
-
-        (A, orthocenter["feet"]["A_feet"]),
-        (B, orthocenter["feet"]["B_feet"]),
-        (C, orthocenter["feet"]["C_feet"])
-
-    ]:
-
+    for i, (v, f, side_start) in enumerate([
+        (A, orthocenter["feet"]["A_feet"], B), 
+        (B, orthocenter["feet"]["B_feet"], A), 
+        (C, orthocenter["feet"]["C_feet"], B)
+    ]):
+        # 1. Vẽ đường cao chính (v -> f -> H)
         fig.add_trace(go.Scatter(
-            x=[v.x,f.x],
-            y=[v.y,f.y],
+            x=[v.x, f.x, H.x], y=[v.y, f.y, H.y],
             mode="lines",
-            line=dict(dash="dot"),
-            legendgroup="altitude",
-            name="Đường cao",
-            showlegend=False,
+            line=dict(dash="dot", color="#f472b6", width=1),
+            legendgroup="altitude", 
+            name="Trực tâm (H)", # Tên chung cho cả group
+            showlegend=False,    # Không hiện dòng riêng cho từng đường cao
             visible="legendonly"
         ))
 
+        # 2. Vẽ đường kéo dài (Chỉ hiện khi f != v)
+        if f != v:
+            fig.add_trace(go.Scatter(
+                x=[side_start.x, f.x], y=[side_start.y, f.y],
+                mode="lines",
+                line=dict(dash="longdash", color="rgba(244, 114, 182, 0.2)"),
+                legendgroup="altitude",
+                showlegend=False, # Không hiện dòng riêng cho đường kéo dài
+                visible="legendonly"
+            ))
+
+    # 3. ĐIỂM TRỰC TÂM H - ĐẠI DIỆN DUY NHẤT TRÊN LEGEND
     fig.add_trace(go.Scatter(
-        x=[H.x],
-        y=[H.y],
-        mode="markers",
-        legendgroup="altitude",
-        name="Trực tâm",
+        x=[H.x], y=[H.y],
+        mode="markers+text",
+        text=["H"], textposition="bottom right",
+        marker=dict(size=12, color="#f472b6", symbol="circle"),
+        legendgroup="altitude", 
+        name="Trực tâm", # ĐÂY LÀ DÒNG DUY NHẤT HIỆN TRÊN BẢNG CHÚ GIẢI
+        showlegend=True,     # Cho phép dòng này xuất hiện
         visible="legendonly"
     ))
 
@@ -282,7 +310,7 @@ def _draw_triangle(x1, y1, x2, y2, x3, y3):
     minx,maxx=min(xs),max(xs)
     miny,maxy=min(ys),max(ys)
 
-    size=max(maxx-minx,maxy-miny)+1
+    size = max(maxx-minx, maxy-miny) * 0.7
 
     cx=(minx+maxx)/2
     cy=(miny+maxy)/2

@@ -1,7 +1,6 @@
 import dash
 from dash import html, dcc, Input, Output, callback, State, ALL, callback_context
 import dash_bootstrap_components as dbc
-from sqlalchemy import and_, or_
 from init_database import get_session, TriangleDomain
 
 dash.register_page(__name__, path="/history")

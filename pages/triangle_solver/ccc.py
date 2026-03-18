@@ -1,7 +1,5 @@
 from dash import html, dcc, Input, Output, State, callback
-from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
-import math
 from __hidden.__solve import _solve_ccc_common
 from __hidden.__draw import _draw_default
 from __hidden.__safe import _safe_extract_to_real_num
